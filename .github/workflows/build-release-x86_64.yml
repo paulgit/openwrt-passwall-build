@@ -1,0 +1,66 @@
+name: Build and Release x86_64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Build for ${{ matrix.arch }}-${{ matrix.sdk.tag }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x86_64
+        sdk:
+          - abi: releases/packages-21.02
+            tag: openwrt-21.02
+          - abi: releases/packages-22.03
+            tag: openwrt-22.03
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Retrieve Version
+        id: ver
+        run: |
+          { read luci_ver; read pkgs_ver; read passwall2_ver; } < current_version
+          echo "::set-output name=luci::$luci_ver"
+          echo "::set-output name=pkgs::$pkgs_ver"
+          echo "::set-output name=passwall2::$passwall2_ver"
+
+      # Use go 1.18.3 for 21.02
+      - name: Override golang version
+        if: matrix.sdk.tag == 'openwrt-21.02'
+        run: |
+          echo "GOLANG_COMMIT=112cf0903125837bc7990813105cbe7ce23f5ece" >> $GITHUB_ENV
+
+      - name: Build Package
+        uses: paulgit/gh-action-sdk@master
+        env:
+          ARCH: ${{ matrix.arch }}-${{ matrix.sdk.tag }}
+          EXTRA_FEEDS: >-
+            src-git|passwall_luci|https://github.com/xiaorouji/openwrt-passwall^${{ steps.ver.outputs.luci }}
+            src-git|passwall_packages|https://github.com/xiaorouji/openwrt-passwall^${{ steps.ver.outputs.pkgs }}
+            src-git|passwall2|https://github.com/xiaorouji/openwrt-passwall2^${{ steps.ver.outputs.passwall2 }}
+          KEY_BUILD: ${{ secrets.SIGN_PRIV_KEY }}
+          V: s
+
+      - name: Tar Output Folder
+        run: |
+          DIST_DIR=$PWD/dist/${{ matrix.sdk.abi }}
+          mkdir -p $DIST_DIR
+
+          pushd bin/packages
+          cp -r --parents */passwall* $DIST_DIR
+          popd
+
+          tar -cf dist.tar dist
+
+      - name: Upload Output Folder
+        uses: actions/upload-artifact@v3
+        with:
+          name: openwrt-passwall-${{ matrix.arch }}-${{ matrix.sdk.tag }}
+          path: dist.tar
+          retention-days: 7
