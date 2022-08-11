@@ -19,7 +19,7 @@ jobs:
     steps:
       # Use go 1.18.3 for 21.02
       - name: Override golang version
-        if: matrix.sdk.tag == 'openwrt-21.02'
+        if: github.event.inputs.sdk_version == 'openwrt-21.02'
         run: |
           echo "GOLANG_COMMIT=112cf0903125837bc7990813105cbe7ce23f5ece" >> $GITHUB_ENV
       
