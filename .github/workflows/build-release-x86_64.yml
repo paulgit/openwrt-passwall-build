@@ -15,8 +15,6 @@ jobs:
         sdk:
           - abi: releases/packages-21.02
             tag: openwrt-21.02
-          - abi: releases/packages-22.03
-            tag: openwrt-22.03
 
     steps:
       - name: Checkout
