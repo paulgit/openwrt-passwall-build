@@ -1,41 +1,26 @@
 # openwrt-passwall-build
 
-Binary distribution of [xiaorouji/openwrt-passwall](https://github.com/xiaorouji/openwrt-passwall) built with official OpenWRT SDK.
+Binary distribution of [xiaorouji/openwrt-passwall](https://github.com/xiaorouji/openwrt-passwall) built for **x86/64 ONLY** with official OpenWRT **21.02** SDK.
 
-[![Build and Release](https://github.com/dianlujitao/openwrt-passwall-build/actions/workflows/build-release.yml/badge.svg)](https://github.com/dianlujitao/openwrt-passwall-build/actions/workflows/build-release.yml)
-[![Scan openwrt-passwall Version](https://github.com/dianlujitao/openwrt-passwall-build/actions/workflows/version-scan.yml/badge.svg)](https://github.com/dianlujitao/openwrt-passwall-build/actions/workflows/version-scan.yml)
+[![Build and Release x86_64](https://github.com/paulgit/openwrt-passwall-build/actions/workflows/build-release-x86_64.yml/badge.svg)](https://github.com/paulgit/openwrt-passwall-build/actions/workflows/build-release-x86_64.yml)
+[![Scan openwrt-passwall Version](https://github.com/paulgit/openwrt-passwall-build/actions/workflows/version-scan.yml/badge.svg)](https://github.com/paulgit/openwrt-passwall-build/actions/workflows/version-scan.yml)
 
 ## Install via OPKG
 
 1. Add new opkg key:
 
 ```sh
-wget https://free.nchc.org.tw/osdn/storage/g/o/op/openwrt-passwall-build/passwall.pub
+wget https://openwrt.paulg.it/passwall.pub
 opkg-key add passwall.pub
 ```
 
 2. Add opkg repository:
 
 ```sh
-read release arch << EOF
-$(. /etc/openwrt_release ; echo ${DISTRIB_RELEASE%.*} $DISTRIB_ARCH)
-EOF
-for feed in passwall_luci passwall_packages passwall2; do
-  echo "src/gz $feed https://free.nchc.org.tw/osdn/storage/g/o/op/openwrt-passwall-build/releases/packages-$release/$arch/$feed" >> /etc/opkg/customfeeds.conf
-done
+  echo "src/gz passwall_packages https://openwrt.paulg.it/passwall/21.02/packages/x86_64/passwall_packages" >> /etc/opkg/customfeeds.conf
+  echo "src/gz passwall_luci https://openwrt.paulg.it/passwall/21.02/packages/x86_64/passwall_luci" >> /etc/opkg/customfeeds.conf
+  echo "src/gz passwall2 https://openwrt.paulg.it/passwall/21.02/packages/x86_64/passwall2" >> /etc/opkg/customfeeds.conf
 ```
-OR
-```sh
-read arch << EOF
-$(. /etc/openwrt_release ; echo $DISTRIB_ARCH)
-EOF
-for feed in passwall_luci passwall_packages passwall2; do
-  echo "src/gz $feed https://free.nchc.org.tw/osdn/storage/g/o/op/openwrt-passwall-build/snapshots/packages/$arch/$feed" >> /etc/opkg/customfeeds.conf
-done
-```
-in case you use a snapshot build.
-
-> NCHC's mirror might not be up-to-date, download from `https://osdn.net/projects/openwrt-passwall-build/storage/` whenever necessary.
 
 3. Install package:
 
@@ -46,8 +31,7 @@ opkg install luci-app-passwall
 
 ## Manual Install
 
-- Download prebuilt ipk file from [OSDN](https://osdn.net/projects/openwrt-passwall-build/storage/).
-
+- Download prebuilt ipk file from [openwrt.paulg.it](https://openwrt.paulg.it/).
 - Upload file to your router, install it with ssh command.
 
 ```sh
